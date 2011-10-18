@@ -1,11 +1,3 @@
-BAT_CHARGE='/Users/tommy/.oh-my-zsh/scripts/bat_charge.py'
-
-function battery_charge {
-    python $BAT_CHARGE
-}
-
-RPROMPT='$(battery_charge)'
-
 if [ "$OH_MY_ZSH_HG" = "x" ]; then
     OH_MY_ZSH_HG="hg"
 fi
