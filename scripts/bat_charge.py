@@ -3,16 +3,14 @@
 
 import math, subprocess
 
-p = subprocess.Popen(["ioreg", "-rc", "AppleSmartBattery"], stdout=subprocess.PIPE)
+p = subprocess.Popen(["acpi"], stdout=subprocess.PIPE)
 output = p.communicate()[0]
 
-o_max = [l for l in output.splitlines() if 'MaxCapacity' in l][0]
-o_cur = [l for l in output.splitlines() if 'CurrentCapacity' in l][0]
+o = output.split(",")
 
-b_max = float(o_max.rpartition('=')[-1].strip())
-b_cur = float(o_cur.rpartition('=')[-1].strip())
+remaining = o[2].split(" ")[1]
 
-charge = b_cur / b_max
+charge = float(o[1].strip(" %")) / 100
 charge_threshold = int(math.ceil(10 * charge))
 
 # Output
@@ -32,6 +30,6 @@ color_out = (
         else color_red
 )
 
-out = color_yellow + empty.encode('utf-8') + color_green + filled.encode('utf-8') + color_reset
+out = color_yellow + empty.encode('utf-8') + color_out + filled.encode('utf-8') + color_reset + " " + remaining.encode('utf-8') + color_reset
 #out = color_out + out + color_reset
 sys.stdout.write(out)
