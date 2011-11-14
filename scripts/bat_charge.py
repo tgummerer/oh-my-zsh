@@ -8,9 +8,12 @@ output = p.communicate()[0]
 
 o = output.split(",")
 
-remaining = o[2].split(" ")[1]
+if (len(o) > 2):
+    remaining = o[2].split(" ")[1]
+else:
+    remaining = "full"
 
-charge = float(o[1].strip(" %")) / 100
+charge = float(o[1].strip().strip('%')) / 100
 charge_threshold = int(math.ceil(10 * charge))
 
 # Output
