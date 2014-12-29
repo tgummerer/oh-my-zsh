@@ -33,8 +33,6 @@ esac
 # returns location of .git repo
 __gitdir ()
 {
-	# Note: this function is duplicated in git-prompt.sh
-	# When updating it, make sure you update the other one to match.
 	if [ -z "${1-}" ]; then
 		if [ -n "${__git_dir-}" ]; then
 			echo "$__git_dir"
@@ -371,14 +369,8 @@ __git_refs ()
 		done
 		;;
 	*)
-		git ls-remote "$dir" HEAD ORIG_HEAD 'refs/tags/*' 'refs/heads/*' 'refs/remotes/*' 2>/dev/null | \
-		while read -r hash i; do
-			case "$i" in
-			*^{}) ;;
-			refs/*) echo "${i#refs/*/}" ;;
-			*) echo "$i" ;;
-			esac
-		done
+		echo "HEAD"
+		git for-each-ref --format="%(refname:short)" -- "refs/remotes/$dir/" | sed -e "s#^$dir/##"
 		;;
 	esac
 }
@@ -656,6 +648,7 @@ __git_list_porcelain_commands ()
 		cat-file)         : plumbing;;
 		check-attr)       : plumbing;;
 		check-ignore)     : plumbing;;
+		check-mailmap)    : plumbing;;
 		check-ref-format) : plumbing;;
 		checkout-index)   : plumbing;;
 		commit-tree)      : plumbing;;
@@ -1169,7 +1162,7 @@ __git_diff_common_options="--stat --numstat --shortstat --summary
 			--no-prefix --src-prefix= --dst-prefix=
 			--inter-hunk-context=
 			--patience --histogram --minimal
-			--raw
+			--raw --word-diff
 			--dirstat --dirstat= --dirstat-by-file
 			--dirstat-by-file= --cumulative
 			--diff-algorithm=
@@ -1217,7 +1210,7 @@ _git_difftool ()
 		return
 		;;
 	esac
-	__git_complete_file
+	__git_complete_revlist_file
 }
 
 __git_fetch_options="
@@ -1754,7 +1747,11 @@ _git_config ()
 		local remote="${prev#remote.}"
 		remote="${remote%.fetch}"
 		if [ -z "$cur" ]; then
+<<<<<<< HEAD
 			__gitcompadd "refs/heads/" "" "" ""
+=======
+			__gitcomp_nl "refs/heads/" "" "" ""
+>>>>>>> 175b4a807383530aa75145b5b6fdedb3ce1f11f2
 			return
 		fi
 		__gitcomp_nl "$(__git_refs_remotes "$remote")"
@@ -1965,7 +1962,6 @@ _git_config ()
 		core.fileMode
 		core.fsyncobjectfiles
 		core.gitProxy
-		core.ignoreCygwinFSTricks
 		core.ignoreStat
 		core.ignorecase
 		core.logAllRefUpdates
@@ -2283,7 +2279,7 @@ _git_show ()
 		return
 		;;
 	esac
-	__git_complete_file
+	__git_complete_revlist_file
 }
 
 _git_show_branch ()
@@ -2498,9 +2494,10 @@ __git_main ()
 		i="${words[c]}"
 		case "$i" in
 		--git-dir=*) __git_dir="${i#--git-dir=}" ;;
+		--git-dir)   ((c++)) ; __git_dir="${words[c]}" ;;
 		--bare)      __git_dir="." ;;
 		--help) command="help"; break ;;
-		-c) c=$((++c)) ;;
+		-c|--work-tree|--namespace) ((c++)) ;;
 		-*) ;;
 		*) command="$i"; break ;;
 		esac
@@ -2518,6 +2515,7 @@ __git_main ()
 			--exec-path
 			--exec-path=
 			--html-path
+			--man-path
 			--info-path
 			--work-tree=
 			--namespace=
