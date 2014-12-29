@@ -1,6 +1,6 @@
 dir=$(dirname $0)
 #source $dir/git-prompt.sh
-source ~/dev/git/contrib/completion/git-prompt.sh
+source ~/work/git/contrib/completion/git-prompt.sh
 
 function git_prompt_info() {
   dirty="$(parse_git_dirty)"
